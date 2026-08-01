@@ -55,14 +55,11 @@ done till now
      find specific user - http://localhost:4000/api/user/find/6a686b95db4874428e179806
      find similar user - http://localhost:4000/api/user/findsimilaruser/6a685a2914384e4357013b58
      following and followers of user - http://localhost:4000/api/user/increasefollowingof/6a685a2914384e4357013b58
+     add a post - http://localhost:4000/api/user/doapost/6a685a2914384e4357013b58
+     get all post of a specific user - http://localhost:4000/api/user/getallpost/6a685a2914384e4357013b58
 
 todo -
     add routes - of user
-        get all followers of the user 
-        get all following of the user 
-
-        add post 
-        get all post 
         edit post 
         delete post
 

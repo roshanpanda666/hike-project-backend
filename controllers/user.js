@@ -1,13 +1,13 @@
-const User=require('../model/user')
-const Hike=require('../model/hike')
-async function createuser(req,res){
-try {
-        if (!req.body ) {
+const User = require('../model/user')
+const Hike = require('../model/hike')
+async function createuser(req, res) {
+    try {
+        if (!req.body) {
             return res.status(400).json({ message: "Request body cannot be empty" });
         }
-        const adduser=await User.create(req.body)
+        const adduser = await User.create(req.body)
         console.log(adduser)
-        return res.status(201).json({message:"user created successfully",data:adduser})
+        return res.status(201).json({ message: "user created successfully", data: adduser })
     } catch (error) {
         console.error("Error creating user:", error);
         // 4. Send error response so the client isn't left hanging
@@ -18,43 +18,43 @@ try {
     }
 }
 
-async function edithikearray(req,res){
-        try {
+async function edithikearray(req, res) {
+    try {
 
-        const userid=req.params.id;
-        const {hikeid}=req.body;
-        
-    if(!hikeid){
-        return res.status(400).json({message:"hike id is required"})
-    }
+        const userid = req.params.id;
+        const { hikeid } = req.body;
 
-    const findhikeid=await Hike.findById(hikeid)
+        if (!hikeid) {
+            return res.status(400).json({ message: "hike id is required" })
+        }
 
-    if(!findhikeid){
-        return res.status(404).json({message:"hike not found"})
-    }
+        const findhikeid = await Hike.findById(hikeid)
 
-    const finduserid=await User.findById(userid)
+        if (!findhikeid) {
+            return res.status(404).json({ message: "hike not found" })
+        }
 
-    if(!finduserid){
-        return res.status(404).json({message:"user not found"})
-    }
+        const finduserid = await User.findById(userid)
 
-    const updateuser=await User.findByIdAndUpdate(userid,
-        {$addToSet:{hikes:hikeid}},
-        {new:true,runValidators:true}
-    ).populate("hikes")
+        if (!finduserid) {
+            return res.status(404).json({ message: "user not found" })
+        }
 
-    await Hike.findByIdAndUpdate(hikeid,
-        {$addToSet:{peoplecoming:userid}}
-    )
-     console.log(updateuser)
+        const updateuser = await User.findByIdAndUpdate(userid,
+            { $addToSet: { hikes: hikeid } },
+            { new: true, runValidators: true }
+        ).populate("hikes")
+
+        await Hike.findByIdAndUpdate(hikeid,
+            { $addToSet: { peoplecoming: userid } }
+        )
+        console.log(updateuser)
 
 
-    return res.status(200).json({
-        message:"hike added to user profile successfully",
-        data:updateuser
-    })
+        return res.status(200).json({
+            message: "hike added to user profile successfully",
+            data: updateuser
+        })
     } catch (error) {
         console.error("Error adding hike:", error);
         return res.status(500).json({
@@ -66,19 +66,19 @@ async function edithikearray(req,res){
 
 }
 
-async function specificuser(req,res){
+async function specificuser(req, res) {
 
-    if(!req.params.id){
-        return res.status(500).json({message:"param is required"})
+    if (!req.params.id) {
+        return res.status(500).json({ message: "param is required" })
     }
     try {
-        const finduser=await User.findById(req.params.id).populate("hikes")
+        const finduser = await User.findById(req.params.id).populate("hikes")
         console.log(finduser)
-        if(!finduser){
-            return res.status(404).json({message:"user not found"})
+        if (!finduser) {
+            return res.status(404).json({ message: "user not found" })
         }
-        return res.status(200).json({message:"found it",finduser})
-        
+        return res.status(200).json({ message: "found it", finduser })
+
     } catch (error) {
         console.log(error)
         return res.status(500).json(error.message)
@@ -86,82 +86,82 @@ async function specificuser(req,res){
 
 }
 
-async function similaritysearch(req,res){
-        if(!req.params.id){
-        return res.status(500).json({message:"param is required"})
+async function similaritysearch(req, res) {
+    if (!req.params.id) {
+        return res.status(500).json({ message: "param is required" })
     }
 
     try {
-        const targetUser=await User.findById(req.params.id)
+        const targetUser = await User.findById(req.params.id)
         console.log(targetUser)
-        if(!targetUser){
-            return res.status(404).json({message:"user not found"})
+        if (!targetUser) {
+            return res.status(404).json({ message: "user not found" })
         }
 
-        const userhikes=targetUser.hikes // an array
+        const userhikes = targetUser.hikes // an array
 
         if (!userhikes || userhikes.length === 0) {
-            return res.status(200).json({ 
-                message: "User has no active hikes", 
+            return res.status(200).json({
+                message: "User has no active hikes",
             });
         }
 
-        const similaruser=await User.find({
-            _id:{$ne:targetUser},
-            hikes:{$in:userhikes}
+        const similaruser = await User.find({
+            _id: { $ne: targetUser },
+            hikes: { $in: userhikes }
         }).populate("hikes")
 
-        return res.status(200).json({message:"similar users found",data:similaruser,count:similaruser.length})
+        return res.status(200).json({ message: "similar users found", data: similaruser, count: similaruser.length })
         console.log(similaruser)
 
 
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ 
-            message: "Internal server error", 
-            error: error.message 
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message
         });
     }
 }
 
-async function followersandfollowing(req,res){
-    const currentuser=req.params.id
-    const targetuser=req.body.id
+async function followersandfollowing(req, res) {
+    const currentuser = req.params.id
+    const targetuser = req.body.id
 
-    if(!currentuser){
-        return res.status(400).json({message:"param missing"})
+    if (!currentuser) {
+        return res.status(400).json({ message: "param missing" })
     }
-    if(!targetuser){
-        return res.status(400).json({message:"id is required in the body"})
+    if (!targetuser) {
+        return res.status(400).json({ message: "id is required in the body" })
     }
 
-    if (currentuser=== targetuser) {
+    if (currentuser === targetuser) {
         return res.status(400).json({ message: "You cannot follow yourself." });
     }
 
     try {
         // add target user to current user's following array
-        const updatefollow=await User.findByIdAndUpdate(currentuser,
-            {$addToSet:{following:targetuser}},
-            {new:true}
+        const updatefollow = await User.findByIdAndUpdate(currentuser,
+            { $addToSet: { following: targetuser } },
+            { new: true }
         )
         if (!updatefollow) {
             return res.status(404).json({ message: "Current user not found." });
         }
 
         // add current user to target user's followers
-        const updatetargetuser=await User.findByIdAndUpdate(targetuser,
-            {$addToSet:{follower:currentuser}},
-            {new:true}
+        const updatetargetuser = await User.findByIdAndUpdate(targetuser,
+            { $addToSet: { follower: currentuser } },
+            { new: true }
         )
 
-        if(!updatetargetuser){
+        if (!updatetargetuser) {
             return res.status(404).json({ message: "Target user to follow not found." });
         }
 
         //fetch current user
 
-        const showresult=await User.findById(currentuser).populate("hikes")
+        const showresult = await User.findById(currentuser).populate("hikes")
 
         return res.status(200).json({
             message: "Following updated successfully",
@@ -174,25 +174,71 @@ async function followersandfollowing(req,res){
     }
 }
 
-async function getallfollowersandfollowing(req,res){
-    const getcurrentuser=req.params.id
-    if(!getcurrentuser){
-        return res.status(400).json({message:"cant be empty param"})
+async function getallfollowersandfollowing(req, res) {
+    const getcurrentuser = req.params.id
+    if (!getcurrentuser) {
+        return res.status(400).json({ message: "cant be empty param" })
     }
     try {
-        const findtheuser=await User.findById(getcurrentuser).populate("follower").populate("following")
-        if(!findtheuser){
-            return res.status(404).json({message:"user not found"})
+        const findtheuser = await User.findById(getcurrentuser).populate("follower").populate("following")
+        if (!findtheuser) {
+            return res.status(404).json({ message: "user not found" })
         }
-        const followers=findtheuser.follower
-        const following=findtheuser.following
-        console.log("followers:",followers)
-        console.log("following:",following)
-        return res.status(200).json({message:"got followers and following",followers:followers,following:following})
+        const followers = findtheuser.follower
+        const following = findtheuser.following
+        console.log("followers:", followers)
+        console.log("following:", following)
+        return res.status(200).json({ message: "got followers and following", followers: followers, following: following })
     } catch (error) {
         console.error(error)
-        return res.status(500).json({message:"server error"})
+        return res.status(500).json({ message: "server error" })
     }
 }
 
-module.exports={createuser,edithikearray,specificuser,similaritysearch,followersandfollowing,getallfollowersandfollowing}
+async function doapost(req, res) {
+
+    try {
+        const userid = req.params.id
+        if (!userid) {
+            console.log("param is required")
+            return res.status(500).json({ message: "param is missing" })
+        }
+        const finduser = await User.findById(userid)
+        if (!finduser) {
+            return res.status(404).json({ message: "user not found" })
+        }
+        const dopost = await User.findByIdAndUpdate(userid,
+            {
+                $push: { posts: req.body.posts},
+            },
+            { new: true, runValidators: true }
+        )
+        res.status(201).json({ success: true, data: dopost })
+    } catch (error) {
+        res.status(400).json({ success: false, message: error.message });
+    }
+
+
+}
+async function getallpost(req,res){
+    const getcurrentuser=req.params.id
+    if(!getcurrentuser){
+        return res.status(500).json({message:"param needed"})
+    }
+
+    try {
+        const finddata=await User.findById(getcurrentuser)
+        console.log("user found",finddata.name)
+        if(!finddata){
+            return res.status(404).json({message:"user not found"})
+        }
+        const findpost=finddata.posts
+        console.log(findpost)
+        return res.status(200).json({message:"posts found",data:findpost})
+    } catch (error) {
+        return res.status(500).json({message:"server side error"})
+        console.error(error)
+    }
+}
+
+module.exports = { createuser, edithikearray, specificuser, similaritysearch, followersandfollowing, getallfollowersandfollowing, doapost , getallpost}
