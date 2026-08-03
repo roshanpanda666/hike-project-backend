@@ -14,11 +14,23 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
     hikes: [
-      {
+    {
+      hike: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "hikes", // References the hikes model
+        ref: "hikes", // model name of your Hike schema
+        required: true
       },
-    ],
+      booked: {
+        type: Boolean,
+        default: false
+      },
+      paid: {
+        type: Boolean,
+        default: false
+      }
+    },
+    { _id: false }
+  ],
     experience: {
       type: String,
       enum: ["Beginner", "Intermediate", "Advanced", "Expert"], // Optional: Restrict to specific levels

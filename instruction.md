@@ -59,6 +59,9 @@ done till now
      get all post of a specific user - http://localhost:4000/api/user/getallpost/6a685a2914384e4357013b58
 
 todo -
+
+        -- update the schema of user a lil bit , when a specific hike is chosen the empty fields of that specific user like -- booked:boolean , paid:boolean will be true so update existing routes like -- update hike for user
+
     add routes - of user
         edit post 
         delete post

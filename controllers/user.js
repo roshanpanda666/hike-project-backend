@@ -22,7 +22,7 @@ async function edithikearray(req, res) {
     try {
 
         const userid = req.params.id;
-        const { hikeid } = req.body;
+        const { hikeid,booked,paid } = req.body;
 
         if (!hikeid) {
             return res.status(400).json({ message: "hike id is required" })
@@ -41,9 +41,13 @@ async function edithikearray(req, res) {
         }
 
         const updateuser = await User.findByIdAndUpdate(userid,
-            { $addToSet: { hikes: hikeid } },
+            { $addToSet: { hikes: {
+                hike:hikeid,
+                booked:booked ?? false,
+                paid:paid ?? false
+            } } }, 
             { new: true, runValidators: true }
-        ).populate("hikes")
+        ).populate("hikes.hike")
 
         await Hike.findByIdAndUpdate(hikeid,
             { $addToSet: { peoplecoming: userid } }
@@ -72,7 +76,7 @@ async function specificuser(req, res) {
         return res.status(500).json({ message: "param is required" })
     }
     try {
-        const finduser = await User.findById(req.params.id).populate("hikes")
+        const finduser = await User.findById(req.params.id).populate("hikes.hike")
         console.log(finduser)
         if (!finduser) {
             return res.status(404).json({ message: "user not found" })
@@ -85,35 +89,40 @@ async function specificuser(req, res) {
     }
 
 }
-
 async function similaritysearch(req, res) {
     if (!req.params.id) {
-        return res.status(500).json({ message: "param is required" })
+        return res.status(400).json({ message: "param is required" });
     }
 
     try {
-        const targetUser = await User.findById(req.params.id)
-        console.log(targetUser)
-        if (!targetUser) {
-            return res.status(404).json({ message: "user not found" })
+        const userid = req.params.id;
+
+        // 1. Check if the target user exists
+        const targetUserExists = await User.exists({ _id: userid });
+        if (!targetUserExists) {
+            return res.status(404).json({ message: "user not found" });
         }
 
-        const userhikes = targetUser.hikes // an array
+        // 2. Use Mongoose/MongoDB distinct() to fetch a flat array of hike ObjectIds directly
+        const targetHikeIds = await User.distinct("hikes.hike", { _id: userid });
 
-        if (!userhikes || userhikes.length === 0) {
+        if (!targetHikeIds || targetHikeIds.length === 0) {
             return res.status(200).json({
                 message: "User has no active hikes",
             });
         }
 
+        // 3. Find other users who share any of these hikes
         const similaruser = await User.find({
-            _id: { $ne: targetUser },
-            hikes: { $in: userhikes }
-        }).populate("hikes")
+            _id: { $ne: userid },
+            "hikes.hike": { $in: targetHikeIds }
+        }).populate("hikes.hike");
 
-        return res.status(200).json({ message: "similar users found", data: similaruser, count: similaruser.length })
-        console.log(similaruser)
-
+        return res.status(200).json({ 
+            message: "similar users found", 
+            data: similaruser, 
+            count: similaruser.length 
+        });
 
     } catch (error) {
         console.error(error);
@@ -161,7 +170,7 @@ async function followersandfollowing(req, res) {
 
         //fetch current user
 
-        const showresult = await User.findById(currentuser).populate("hikes")
+        const showresult = await User.findById(currentuser).populate("hikes.hike")
 
         return res.status(200).json({
             message: "Following updated successfully",
