@@ -23,8 +23,8 @@ async function addhike(req,res){
 
 async function gethike(req,res){
     try {
-        const getalldata=await Hike.find().populate("peoplecoming")
-        console.log(getalldata)
+        console.log(req.query)
+        const getalldata=await Hike.find(req.query).populate("peoplecoming") // filtering 
         return res.status(200).json({message:"fetched all data successfully",data:getalldata})
     } catch (error) {
         return res.status(500).json({message:"error fetching the data"})

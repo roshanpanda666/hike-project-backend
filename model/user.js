@@ -1,5 +1,5 @@
-const mongoose=require("mongoose")
-
+const mongoose=require("mongoose");
+const bcrypt = require("bcryptjs"); 
 
 //user schema
 const userSchema = new mongoose.Schema(
@@ -9,9 +9,19 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    email:{
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password:{
+      type:String,
+      required:true
+    },
     number: {
       type: Number,
       required: true,
+      
     },
     hikes: [
     {
@@ -59,6 +69,18 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+userSchema.pre("save", async function () {
+  // 1. Skip hashing if password wasn't modified
+  if (!this.isModified("password")) return;
+
+  // 2. Hash the password
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+// 3. Helper instance method: Compares entered password with hashed password during login
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 // Create and export the model
 const User = mongoose.model("users", userSchema);
 

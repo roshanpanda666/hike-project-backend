@@ -59,6 +59,7 @@ done till now
      get all post of a specific user - http://localhost:4000/api/user/getallpost/6a685a2914384e4357013b58
 
 todo -
+    add some api feature -- filtering , data limiting , sorting , pagination , alising , aggregation pipeline , 
     add routes - of user
         edit post 
         delete post
