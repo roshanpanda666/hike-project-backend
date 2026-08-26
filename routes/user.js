@@ -23,4 +23,6 @@ router.get("/getallpost/:id",getallpost)
 
 router.post("/signup",authcontroller.signup)
 
+router.post("/login",authcontroller.login)
+
 module.exports=router
