@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema(
       paid: {
         type: Boolean,
         default: false
+      },
+      completed:{
+        type:Boolean,
+        default:false
       }
     },
     { _id: false }
@@ -60,7 +64,11 @@ const userSchema = new mongoose.Schema(
     ],
     posts: [
       {
-        type: String, // Array of strings (e.g., image URLs or post content)
+        content: {
+          type: String, // The actual post text or image URL
+          required: true
+        }
+        // Mongoose automatically adds an _id to subdocuments!
       },
     ],
   },

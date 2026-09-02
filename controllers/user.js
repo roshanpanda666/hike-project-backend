@@ -218,7 +218,7 @@ async function doapost(req, res) {
         }
         const dopost = await User.findByIdAndUpdate(userid,
             {
-                $push: { posts: req.body.posts},
+                $push: { posts: { content: req.body.posts } },
             },
             { new: true, runValidators: true }
         )
@@ -245,9 +245,97 @@ async function getallpost(req,res){
         console.log(findpost)
         return res.status(200).json({message:"posts found",data:findpost})
     } catch (error) {
+        console.error(error)  
         return res.status(500).json({message:"server side error"})
-        console.error(error)
+        
     }
 }
 
-module.exports = { createuser, edithikearray, specificuser, similaritysearch, followersandfollowing, getallfollowersandfollowing, doapost , getallpost}
+async function hikecompleted(req,res){
+    const userid=req.params.id
+    const hikeid=req.body.hikeid
+    if(!userid || !hikeid){
+        return res.status(500).json({message:"param missing"})
+    }
+    try {
+        const finduser=await User.findById(userid)
+        if(!finduser){
+            return res.status(404).json({message:"user not found"})
+        }
+        const findhike=await Hike.findById(hikeid)
+        if(!findhike){
+            return res.status(404).json({message:"hike not found"})
+        }
+        const updateuser=await User.findOneAndUpdate(
+            { _id: userid, "hikes.hike": hikeid },
+            { $set: { "hikes.$.completed": true } },
+            { new: true, runValidators: true }
+        )
+        return res.status(200).json({message:"hike completed",data:updateuser})
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({message:"server error"})
+    }
+}
+
+async function editpost(req,res)
+{
+    const userid=req.params.id
+    const editpostid=req.body.editpostid
+    const content=req.body.content
+
+    if(!userid || !editpostid){
+        return res.status(500).json({message:"param missing"})
+    }
+    try {
+        const editthepost=await User.findOneAndUpdate(
+            {_id:userid,"posts._id":editpostid},
+            {$set:{ "posts.$.content":content}},
+            {new:true,runValidators:true}
+
+        )
+        if(!editthepost){
+            return res.status(404).json({message:"post not found"})
+        }
+        return res.status(200).json({message:"post edited",data:editthepost})
+        
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({message:"server error"})
+        
+    }
+
+}
+
+async function deleteapost(req, res) {
+    const userid = req.params.id;
+    const postid = req.body.postid;
+
+    if (!userid || !postid) {
+        return res.status(500).json({ message: "param missing" });
+    }
+
+    try {
+        // Use findByIdAndUpdate and $pull to remove the post from the array
+        const updatetheuser = await User.findByIdAndUpdate(
+            userid,
+            { $pull: { posts: { _id: postid } } },
+            { new: true }
+        );
+
+        if (!updatetheuser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        return res.status(200).json({ 
+            message: "Post deleted successfully", 
+            data: updatetheuser 
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "server error" });
+    }
+}
+
+module.exports = { createuser, edithikearray, specificuser, similaritysearch, followersandfollowing, getallfollowersandfollowing, doapost , getallpost,hikecompleted,hikecompleted,editpost , deleteapost}
