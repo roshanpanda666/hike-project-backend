@@ -29,3 +29,17 @@ Because agentic workflows involve reasoning, tool-calling, and database executio
 * **Validation:** `Pydantic` (for LLM tool-call structuring and type safety)
 * **Real-time Protocol:** `Server-Sent Events (SSE)` (for streaming agent reasoning)
 * **Security:** `JWT` (for stateless, context-bounded tool execution)
+
+## 🚀 Future Roadmap: Autonomous SRE & Self-Healing Infrastructure
+
+Looking beyond application-level user agents, the long-term vision for this platform includes an **AIOps (AI for IT Operations)** agent designed to maintain a 100% autonomous, self-healing infrastructure.
+
+### The DevOps Agent
+This system will utilize the same Tool-Calling and Agentic architecture, but aimed at server health and CI/CD pipelines instead of user data:
+1. **Sensors (Real-time Monitoring):** The agent will be hooked into infrastructure webhooks (e.g., Prometheus, Datadog, AWS CloudWatch). It constantly monitors for spikes in CPU, database storage limits, or 500 error rates.
+2. **Reasoning (Automated Diagnostics):** Upon receiving an alert, the agent autonomously calls tools to investigate (e.g., `query_server_logs`, `check_db_capacity`, or `fetch_recent_github_commits`).
+3. **Actuators (Self-Healing Execution):** Once the issue is diagnosed, the agent orchestrates infrastructure tools to solve the problem without human intervention:
+   * **Horizontal Scaling:** If the database or server is overwhelmed, the agent triggers a Kubernetes or Terraform tool to instantly spin up new instances.
+   * **Code-Level Patching:** If a recent deployment introduced a fatal bug, the agent can generate a code patch, commit it to GitHub, and trigger the CI/CD pipeline for an automated rollback or hotfix deployment.
+
+By bridging the gap between Application-Embedded AI and Infrastructure-as-Code (IaC), the ultimate goal is a system that not only serves users intelligently but also sustains itself autonomously.
