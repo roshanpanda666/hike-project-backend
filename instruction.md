@@ -59,11 +59,11 @@ done till now
      get all post of a specific user - http://localhost:4000/api/user/getallpost/6a685a2914384e4357013b58
      edit post - http://localhost:4000/api/user/editpost/6a685a2914384e4357013b58
      delete post - http://localhost:4000/api/user/deletepost/6a685a2914384e4357013b58
+     edit experience - http://localhost:4000/api/user/edituserexp/6a685a2914384e4357013b58
 
 todo -
     add some api feature -- filtering , data limiting , sorting , pagination , alising , aggregation pipeline , 
     add routes - of user
-        edit experience 
 
    add routes - of hike 
        edit hike

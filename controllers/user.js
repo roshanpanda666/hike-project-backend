@@ -338,4 +338,30 @@ async function deleteapost(req, res) {
     }
 }
 
-module.exports = { createuser, edithikearray, specificuser, similaritysearch, followersandfollowing, getallfollowersandfollowing, doapost , getallpost,hikecompleted,hikecompleted,editpost , deleteapost}
+async function editexperience(req,res){
+    const userid=req.params.id
+    const experiencetobeset=req.body.experiencetobeset
+
+    if(!userid){
+        return res.status(400).json({message:"user id is required"})
+    }
+    if(!experiencetobeset){
+        return res.status(400).json({message:"experience is missing to be set"})
+    }
+
+    try {
+        const finduser=User.findOne({id:userid})
+        if(!finduser){
+            return res.status(404).json({message:"user does not exist"})
+        }
+        const edituserexp=await User.findByIdAndUpdate(userid,
+            {$set:{experience:experiencetobeset}},
+            {new:true,runValidators:true}
+        )
+        return res.status(202).json({edituserexp,message:"user's experience edited"})
+    } catch (error) {
+        return res.status(500).json({error:error,message:"server side error"})
+    }
+}
+
+module.exports = { createuser, edithikearray, specificuser, similaritysearch, followersandfollowing, getallfollowersandfollowing, doapost , getallpost,hikecompleted,hikecompleted,editpost , deleteapost, editexperience}

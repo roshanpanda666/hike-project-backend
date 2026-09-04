@@ -2,7 +2,7 @@ const express=require("express")
 
 const router=express.Router()
 
-const { createuser, edithikearray, specificuser, similaritysearch, followersandfollowing, getallfollowersandfollowing, doapost, getallpost,hikecompleted,editpost,deleteapost }=require("../controllers/user")
+const { createuser, edithikearray, specificuser, similaritysearch, followersandfollowing, getallfollowersandfollowing, doapost, getallpost,hikecompleted,editpost,deleteapost,editexperience }=require("../controllers/user")
 const authcontroller=require("../controllers/authcontroller")
 
 router.post("/create",createuser)
@@ -30,5 +30,7 @@ router.patch("/hikecompleted/:id",hikecompleted)
 router.patch("/editpost/:id",editpost)
 
 router.patch("/deletepost/:id",deleteapost)
+
+router.patch("/edituserexp/:id",editexperience)
 
 module.exports=router
