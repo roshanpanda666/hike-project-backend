@@ -1,6 +1,7 @@
 const User=require('../model/user')
 const jwt=require('jsonwebtoken')
 const bcrypt = require('bcryptjs'); // Assuming passwords are hashed with bcrypt
+const {promisify}=require("util")
 
 const signtoken=id=>{
     return jwt.sign({id},process.env.JWT_SECRET,{expiresIn:process.env.JWT_EXPIRES_IN})
@@ -65,3 +66,55 @@ exports.login=async(req,res,next)=>{
     // if everything ok send token to the client 
 
 }
+
+
+exports.protect = async (req, res, next) => {
+    try {
+        console.log("authenticating the user");
+
+        // 1 - Get the token and check if it's there 
+        let token;
+        if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+            token = req.headers.authorization.split(" ")[1];
+        }
+
+        if (!token) {
+            const error = new Error("You are not logged in, please log in to use the app");
+            error.statusCode = 401;
+            return next(error);
+        }
+
+        // 2 - Verification of the token
+        // We use promisify to use async/await with jwt.verify instead of callbacks
+        const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+        // 3 - Check if the user still exists 
+        // The token payload usually contains the user's ID (e.g., decoded.id)
+        const currentUser = await User.findById(decoded.id); 
+        
+        if (!currentUser) {
+            const error = new Error("The user belonging to this token no longer exists.");
+            error.statusCode = 401;
+            return next(error);
+        }
+
+        // 4 - Check if user changed password after the token was issued
+        // You will need a method on your User model to check this (see below)
+        if (currentUser.changedPasswordAfter && currentUser.changedPasswordAfter(decoded.iat)) {
+            const error = new Error("User recently changed password! Please log in again.");
+            error.statusCode = 401;
+            return next(error);
+        }
+
+        // 5 - GRANT ACCESS TO PROTECTED ROUTE
+        // Attach the user to the request object so subsequent middleware/controllers can use it
+        req.user = currentUser;
+        next();
+
+    } catch (err) {
+        // This catches JWT errors (like TokenExpiredError or JsonWebTokenError)
+        err.statusCode = 401;
+        err.message = "Invalid or expired token. Please log in again.";
+        next(err);
+    }
+};
